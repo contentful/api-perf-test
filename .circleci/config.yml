@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  run:
+    machine: true
+    environment:
+      DOCKER_REGISTRY: 806120774687.dkr.ecr.us-east-1.amazonaws.com
+      LIBRATO_EMAIL: 'despicable.me@contentful.com'
+      # LIBRATO_TOKEN: 'TOKEN_HERE'
+    steps:
+      - run:
+          name: Setup docker
+          command: |
+            docker --version
+      - run:
+          name: Setup circle
+          command:  |
+            circleci version
+      - run:
+          name: Download statsd
+          command:  |
+            docker run --rm -e LIBRATO_EMAIL=$LIBRATO_EMAIL -e LIBRATO_TOKEN=$LIBRATO_TOKEN -p 8125 $DOCKER_REGISTRY/contentful/statsd
+      - run:
+          name: Perform benchmark
+          command:  |
+           echo "benchmark_publish_time:$(node run.js)|ms" | nc -u -w0 127.0.0.1 8125

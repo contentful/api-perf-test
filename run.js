@@ -1,3 +1,5 @@
+console.log(12); return;
+
 require('dotenv').config()
 const request = require('request-promise-native')
 
