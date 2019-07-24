@@ -1,0 +1,15 @@
+{
+  "name": "api-perf-test",
+  "version": "0.0.1",
+  "description": "Synth test for time to publish",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7"
+  }
+}

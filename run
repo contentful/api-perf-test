@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+
+const request = require('request-promise-native')
+
+const cmaToken = 'CFPAT-yUrjygNkXBByzw1fLQPO0w3wPfbqgcRkv0bTJBmu9UY'
+const cdaToken = 'dmr-ZnXfcBGqBYfI0SVUBfMTx5Caqv3yniM9-fluiw4'
+const entryEndpoint = 'https://api.contentful.com/spaces/cow0tjjvljcp/entries/7LtY7jEaKBTMer7s2Xm4a1'
+const publishEndpoint = `${entryEndpoint}/published`
+const cdaEndpoint = 'https://cdn.contentful.com/spaces/cow0tjjvljcp/entries/7LtY7jEaKBTMer7s2Xm4a1'
+const numOfRuns = 10
+
+async function sendRequest ({ method, url, token, version }) {
+  const options = { 
+    method,
+    url,
+    headers: 
+    { 
+      Authorization: `Bearer ${token}`,
+      ...(version ? ({'X-Contentful-Version': version }): ({})),
+      'Content-Type': 'application/json' 
+    } 
+  }
+
+  return request(options)
+}
+
+async function run () {
+  const entry = await sendRequest({
+    method: 'GET',
+    url: entryEndpoint,
+    token: cmaToken
+  })
+  const version = JSON.parse(entry).sys.version
+
+  await sendRequest({ 
+    method: 'PUT',
+    url: publishEndpoint,
+    token: cmaToken,
+    version
+  })
+  const pubTime = Date.now()
+  let isPublished = false
+  let timeToPublish
+
+  while (!isPublished) {
+    try {
+      const r = await sendRequest({
+        method: 'GET',
+        url: cdaEndpoint,
+        token: cdaToken
+      })
+
+      timeToPublish = Date.now() - pubTime
+      isPublished = true
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  console.log(`${timeToPublish}ms`)
+  await sendRequest({ method: 'DELETE', url: publishEndpoint, token: cmaToken, version: version+1 })
+}
+
+run()
