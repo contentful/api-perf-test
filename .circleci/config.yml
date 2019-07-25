@@ -32,7 +32,7 @@ workflows:
            cron: "* * * * *"
            filters:
              branches:
-               ignore:
-                 - some-branch
+               only:
+                 - master
      jobs:
        - run

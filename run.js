@@ -1,13 +1,16 @@
-console.log(12); return;
-
 require('dotenv').config()
 const request = require('request-promise-native')
 
 const cmaToken = process.env.CMA_TOKEN
 const cdaToken = process.env.CDA_TOKEN 
-const entryEndpoint = 'https://api.contentful.com/spaces/cow0tjjvljcp/entries/7LtY7jEaKBTMer7s2Xm4a1'
+const spaceId = process.env.SPACE_ID
+const entryId = process.env.ENTRY_ID
+const cmaHost = 'https://api.contentful.com'
+const cdaHost = 'https://cdn.contentful.com'
+const entryRoute = `spaces/${spaceId}/entries/${entryId}`
+const entryEndpoint = `${cmaHost}/${entryRoute}`
 const publishEndpoint = `${entryEndpoint}/published`
-const cdaEndpoint = 'https://cdn.contentful.com/spaces/cow0tjjvljcp/entries/7LtY7jEaKBTMer7s2Xm4a1'
+const cdaEndpoint = `${cdaHost}/${entryRoute}`
 
 const msSince = (start) => {
   const finish = process.hrtime(start)
