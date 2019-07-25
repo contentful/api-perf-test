@@ -23,3 +23,16 @@ jobs:
           name: Perform benchmark
           command:  |
            echo "benchmark_publish_time:$(node run.js)|ms" | nc -u -w0 127.0.0.1 8125
+
+workflows:
+   version: 2
+   nightly:
+     triggers:
+       - schedule:
+           cron: "* * * * *"
+           filters:
+             branches:
+               ignore:
+                 - some-branch
+     jobs:
+       - run
