@@ -1,0 +1,40 @@
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: circleci/node:10.0.0
+    steps:
+      - checkout
+      - run:
+          name: Setup docker
+          command: |
+            docker --version
+      - run:
+          name: Setup circle
+          command:  |
+            circleci version
+      - run:
+          name: Install Node deps
+          command: |
+            npm install
+      - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt-get update && sudo apt-get install -y awscli
+      - run:
+          name: Perform benchmark
+          command:  |
+            aws cloudwatch put-metric-data --metric-name TimeToPublished --namespace CtfPerf --value $(node run.js) --unit Milliseconds --timestamp $(date -u +"%Y-%m-%dT%H:%M:%SZ") --region us-east-1
+
+workflows:
+   version: 2
+   nightly:
+     triggers:
+       - schedule:
+           cron: "* * * * *"
+           filters:
+             branches:
+               only:
+                 - master
+     jobs:
+       - test
