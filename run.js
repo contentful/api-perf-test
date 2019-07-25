@@ -1,79 +1,99 @@
-require('dotenv').config()
-const request = require('request-promise-native')
+require("dotenv").config()
+const request = require("request-promise-native")
 
 const cmaToken = process.env.CMA_TOKEN
-const cdaToken = process.env.CDA_TOKEN 
+const cdaToken = process.env.CDA_TOKEN
 const spaceId = process.env.SPACE_ID
-const entryId = process.env.ENTRY_ID
-const cmaHost = 'https://api.contentful.com'
-const cdaHost = 'https://cdn.contentful.com'
-const entryRoute = `spaces/${spaceId}/entries/${entryId}`
-const entryEndpoint = `${cmaHost}/${entryRoute}`
-const publishEndpoint = `${entryEndpoint}/published`
-const cdaEndpoint = `${cdaHost}/${entryRoute}`
 
-const msSince = (start) => {
-  const finish = process.hrtime(start)
+run()
 
-  return (finish[0] * 1000) + (finish[1] / 1e6);
+async function run() {
+  const publishStartedAt = process.hrtime()
+  const entryId = await createNewEntry()
+  await publishEntry(entryId)
+  await waitUntilContentIsDelivered(entryId)
+  console.log(msSince(publishStartedAt))
 }
 
-async function sendRequest ({ method, url, token, version }) {
-  const options = { 
-    method,
-    url,
-    headers: 
-    { 
-      Authorization: `Bearer ${token}`,
-      ...(version ? ({'X-Contentful-Version': version }): ({})),
-      'Content-Type': 'application/json' 
-    } 
+// Promise<createdEntryId: int>
+async function createNewEntry() {
+  const options = {
+    method: "POST",
+    url: `https://api.contentful.com/spaces/${spaceId}/environments/master/entries`,
+    token: cmaToken,
+    headers: {
+      Authorization: `Bearer ${cmaToken}`,
+      "Content-Type": "application/json",
+      "X-Contentful-Content-Type": "testing"
+    },
+    body: JSON.stringify({
+      fields: {
+        title: {
+          "en-US": "Yolo"
+        },
+        content: {
+          "en-US": "Foobar"
+        }
+      }
+    })
   }
 
-  return request(options)
+  const raw = await request(options)
+  const parsed = JSON.parse(raw)
+
+  return parsed.sys.id
 }
 
-async function run () {
-  const r = await sendRequest({
-    method: 'GET',
-    url: entryEndpoint,
-    token: cmaToken
-  })
-  const entry = JSON.parse(r)
-  const version = entry.sys.version
-  const publishedCounter = entry.sys.publishedCounter
-
-  const startPublish = process.hrtime()
-  await sendRequest({ 
-    method: 'PUT',
-    url: publishEndpoint,
+// Promise<>
+async function publishEntry(entryId) {
+  await request({
+    method: "PUT",
+    url: `https://api.contentful.com/spaces/${spaceId}/environments/master/entries/${entryId}/published`,
     token: cmaToken,
-    version
+    headers: {
+      Authorization: `Bearer ${cmaToken}`,
+      "Content-Type": "application/json",
+      "X-Contentful-Version": "1"
+    }
   })
-  let endPublish
+}
 
-  while (true) {
-    try {
-      const r = await sendRequest({
-        method: 'GET',
-        url: cdaEndpoint,
-        token: cdaToken
-      })
-      const entry = JSON.parse(r)
-
-      if (entry.sys.revision > publishedCounter) {
-        endPublish = msSince(startPublish)
-        break
-      }
-    } catch (e) {
-      if (e.statusCode !== 404) {
-        break
-      }
+// Promise<boolean>
+async function isContentDeliveredYet(entryId) {
+  const options = {
+    method: "GET",
+    url: `https://cdn.contentful.com/spaces/${spaceId}/entries/${entryId}`,
+    headers: {
+      Authorization: `Bearer ${cdaToken}`,
+      "Content-Type": "application/json"
     }
   }
 
-  await sendRequest({ method: 'DELETE', url: publishEndpoint, token: cmaToken, version: version+1 })
-  console.log(endPublish)
+  let raw
+  try {
+    raw = await request(options)
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return false
+    }
+
+    throw err
+  }
+
+  const parsed = JSON.parse(raw)
+  return parsed.sys.id === entryId
 }
 
-run()
+async function waitUntilContentIsDelivered(entryId) {
+  while (true) {
+    if (await isContentDeliveredYet(entryId)) {
+      break
+    }
+  }
+}
+
+function msSince(start) {
+  const finish = process.hrtime(start)
+
+  return finish[0] * 1000 + finish[1] / 1e6
+}
