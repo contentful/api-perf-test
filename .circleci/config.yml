@@ -28,17 +28,13 @@ jobs:
 
 workflows:
    version: 2
-   test:
+   nightly:
+     triggers:
+       - schedule:
+           cron: "* * * * *"
+           filters:
+             branches:
+               only:
+                 - master
      jobs:
        - test
-     
-   # nightly:
-   #   triggers:
-   #     - schedule:
-   #         cron: "* * * * *"
-   #         filters:
-   #           branches:
-   #             only:
-   #               - master
-   #   jobs:
-   #     - test
