@@ -21,7 +21,7 @@ async function run () {
   await publishEntry({ cmaToken, spaceId, entryId, version: entryVersion });
   await waitUntilContentIsDelivered({
     entryId,
-    expectedVersion: entryVersion,
+    expectedRevision: 1,
     spaceId,
     cdaToken
   });

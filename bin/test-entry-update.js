@@ -5,7 +5,10 @@ const {
   publishEntry,
   getLatestVersion
 } = require('../lib/content');
-const { waitUntilContentIsDelivered } = require('../lib/delivery');
+const {
+  waitUntilContentIsDelivered,
+  getPublishedRevision
+} = require('../lib/delivery');
 
 const cmaToken = process.env.CMA_TOKEN;
 const spaceId = process.env.SPACE_ID;
@@ -15,12 +18,19 @@ const existingEntryId = process.env.EXISTING_ENTRY_ID;
 run();
 
 async function run () {
-  const publishStartedAt = process.hrtime();
-  const version = await getLatestVersion({
+  const latestPublishedRevision = await getPublishedRevision({
+    cdaToken,
+    spaceId,
+    entryId: existingEntryId
+  });
+
+  const latestVersion = await getLatestVersion({
     cmaToken,
     spaceId,
     entryId: existingEntryId
   });
+
+  const publishStartedAt = process.hrtime();
 
   // Update existing entry, get updated version number
   // Publish it
@@ -29,7 +39,7 @@ async function run () {
   const updatedVersion = await updateEntry({
     cmaToken,
     spaceId,
-    version,
+    version: latestVersion,
     entryId: existingEntryId
   });
 
@@ -42,7 +52,7 @@ async function run () {
 
   await waitUntilContentIsDelivered({
     entryId: existingEntryId,
-    expectedVersion: updatedVersion,
+    expectedRevision: latestPublishedRevision + 1,
     spaceId,
     cdaToken
   });
