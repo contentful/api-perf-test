@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const startTimer = require('../lib/timer');
 const { createEntry, publishEntry } = require('../lib/content');
 const { waitUntilContentIsDelivered } = require('../lib/delivery');
 
@@ -10,7 +11,7 @@ const cdaToken = process.env.CDA_TOKEN;
 run();
 
 async function run () {
-  const publishStartedAt = process.hrtime();
+  const endTimer = startTimer();
 
   // Create a new entry
   // Publish it
@@ -26,11 +27,5 @@ async function run () {
     cdaToken
   });
 
-  console.log(msSince(publishStartedAt));
-}
-
-function msSince (start) {
-  const finish = process.hrtime(start);
-
-  return finish[0] * 1000 + finish[1] / 1e6;
+  console.log(endTimer());
 }

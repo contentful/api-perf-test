@@ -1,10 +1,12 @@
 require('dotenv').config();
 
+const startTimer = require('../lib/timer');
 const {
   updateEntry,
   publishEntry,
   getLatestVersion
 } = require('../lib/content');
+
 const {
   waitUntilContentIsDelivered,
   getPublishedRevision
@@ -30,7 +32,7 @@ async function run () {
     entryId: existingEntryId
   });
 
-  const publishStartedAt = process.hrtime();
+  const endTimer = startTimer();
 
   // Update existing entry, get updated version number
   // Publish it
@@ -57,11 +59,5 @@ async function run () {
     cdaToken
   });
 
-  console.log(msSince(publishStartedAt));
-}
-
-function msSince (start) {
-  const finish = process.hrtime(start);
-
-  return finish[0] * 1000 + finish[1] / 1e6;
+  console.log(endTimer());
 }
