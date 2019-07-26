@@ -9,13 +9,62 @@ run()
 
 async function run() {
   const publishStartedAt = process.hrtime()
-  const entryId = await createNewEntry()
+  const [entryId, entryVersion] = await createNewEntry()
   await publishEntry(entryId)
-  await waitUntilContentIsDelivered(entryId)
+  await waitUntilContentIsDelivered(entryId, entryVersion)
   console.log(msSince(publishStartedAt))
 }
 
-// Promise<createdEntryId: int>
+// Promise<boolean>
+async function isContentDeliveredYet(entryId, expectedVersion) {
+  const options = {
+    method: "GET",
+    url: `https://cdn.contentful.com/spaces/${spaceId}/entries/${entryId}`,
+    headers: {
+      Authorization: `Bearer ${cdaToken}`,
+      "Content-Type": "application/json"
+    }
+  }
+
+  let raw
+  try {
+    raw = await request(options)
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return false
+    }
+
+    throw err
+  }
+
+  const parsed = JSON.parse(raw)
+
+  return parsed.sys.revision === expectedVersion
+}
+
+async function waitUntilContentIsDelivered(entryId, expectedVersion) {
+  while (true) {
+    if (await isContentDeliveredYet(entryId, expectedVersion)) {
+      break
+    }
+  }
+}
+
+// Promise<>
+async function publishEntry(entryId) {
+  await request({
+    method: "PUT",
+    url: `https://api.contentful.com/spaces/${spaceId}/environments/master/entries/${entryId}/published`,
+    token: cmaToken,
+    headers: {
+      Authorization: `Bearer ${cmaToken}`,
+      "Content-Type": "application/json",
+      "X-Contentful-Version": "1"
+    }
+  })
+}
+
+// Promise<[createdEntryId: int, createdEntryVersion: int]>
 async function createNewEntry() {
   const options = {
     method: "POST",
@@ -41,55 +90,7 @@ async function createNewEntry() {
   const raw = await request(options)
   const parsed = JSON.parse(raw)
 
-  return parsed.sys.id
-}
-
-// Promise<>
-async function publishEntry(entryId) {
-  await request({
-    method: "PUT",
-    url: `https://api.contentful.com/spaces/${spaceId}/environments/master/entries/${entryId}/published`,
-    token: cmaToken,
-    headers: {
-      Authorization: `Bearer ${cmaToken}`,
-      "Content-Type": "application/json",
-      "X-Contentful-Version": "1"
-    }
-  })
-}
-
-// Promise<boolean>
-async function isContentDeliveredYet(entryId) {
-  const options = {
-    method: "GET",
-    url: `https://cdn.contentful.com/spaces/${spaceId}/entries/${entryId}`,
-    headers: {
-      Authorization: `Bearer ${cdaToken}`,
-      "Content-Type": "application/json"
-    }
-  }
-
-  let raw
-  try {
-    raw = await request(options)
-  } catch (err) {
-    if (err.statusCode === 404) {
-      return false
-    }
-
-    throw err
-  }
-
-  const parsed = JSON.parse(raw)
-  return parsed.sys.id === entryId
-}
-
-async function waitUntilContentIsDelivered(entryId) {
-  while (true) {
-    if (await isContentDeliveredYet(entryId)) {
-      break
-    }
-  }
+  return [parsed.sys.id, parsed.sys.version]
 }
 
 function msSince(start) {
