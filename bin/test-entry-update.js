@@ -17,9 +17,13 @@ const spaceId = process.env.SPACE_ID;
 const cdaToken = process.env.CDA_TOKEN;
 const existingEntryId = process.env.EXISTING_ENTRY_ID;
 
-run();
+require.main === module && run({ cmaToken, cdaToken, spaceId });
 
-async function run () {
+module.exports = {
+  run
+};
+
+async function run ({ cmaToken, cdaToken, spaceId }) {
   const latestPublishedRevision = await getPublishedRevision({
     cdaToken,
     spaceId,

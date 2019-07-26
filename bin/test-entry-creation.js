@@ -8,9 +8,13 @@ const cmaToken = process.env.CMA_TOKEN;
 const spaceId = process.env.SPACE_ID;
 const cdaToken = process.env.CDA_TOKEN;
 
-run();
+require.main === module && run({ cmaToken, cdaToken, spaceId });
 
-async function run () {
+module.exports = {
+  run
+};
+
+async function run ({ cmaToken, cdaToken, spaceId }) {
   const endTimer = startTimer();
 
   // Create a new entry
