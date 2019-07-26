@@ -18,7 +18,7 @@ async function run() {
   // Print out the time that took
   const [entryId, entryVersion] = await createNewEntry({ cmaToken, spaceId })
 
-  await publishEntry({ cmaToken, spaceId, entryId })
+  await publishEntry({ cmaToken, spaceId, entryId, version: entryVersion })
   await waitUntilContentIsDelivered({
     entryId,
     expectedVersion: entryVersion,

@@ -1,6 +1,10 @@
 require("dotenv").config()
 
-const { updateEntry, publishEntry } = require("../lib/content")
+const {
+  updateEntry,
+  publishEntry,
+  getLatestVersion
+} = require("../lib/content")
 const { waitUntilContentIsDelivered } = require("../lib/delivery")
 
 const cmaToken = process.env.CMA_TOKEN
@@ -12,21 +16,33 @@ run()
 
 async function run() {
   const publishStartedAt = process.hrtime()
-
-  // Update existing entry, get updated version number
-  // Publish it
-  // Send requests to CDA until published version is delivered
-  // Print out the time that took
-  const entryVersion = await updateEntry({
+  const version = await getLatestVersion({
     cmaToken,
     spaceId,
     entryId: existingEntryId
   })
 
-  await publishEntry({ cmaToken, spaceId, entryId: existingEntryId })
+  // Update existing entry, get updated version number
+  // Publish it
+  // Send requests to CDA until published version is delivered
+  // Print out the time that took
+  const updatedVersion = await updateEntry({
+    cmaToken,
+    spaceId,
+    version,
+    entryId: existingEntryId
+  })
+
+  await publishEntry({
+    cmaToken,
+    spaceId,
+    entryId: existingEntryId,
+    version: updatedVersion
+  })
+
   await waitUntilContentIsDelivered({
     entryId: existingEntryId,
-    expectedVersion: entryVersion,
+    expectedVersion: updatedVersion,
     spaceId,
     cdaToken
   })
