@@ -1,26 +1,26 @@
-require("dotenv").config()
+require('dotenv').config();
 
 const {
   updateEntry,
   publishEntry,
   getLatestVersion
-} = require("../lib/content")
-const { waitUntilContentIsDelivered } = require("../lib/delivery")
+} = require('../lib/content');
+const { waitUntilContentIsDelivered } = require('../lib/delivery');
 
-const cmaToken = process.env.CMA_TOKEN
-const spaceId = process.env.SPACE_ID
-const cdaToken = process.env.CDA_TOKEN
-const existingEntryId = process.env.EXISTING_ENTRY_ID
+const cmaToken = process.env.CMA_TOKEN;
+const spaceId = process.env.SPACE_ID;
+const cdaToken = process.env.CDA_TOKEN;
+const existingEntryId = process.env.EXISTING_ENTRY_ID;
 
-run()
+run();
 
-async function run() {
-  const publishStartedAt = process.hrtime()
+async function run () {
+  const publishStartedAt = process.hrtime();
   const version = await getLatestVersion({
     cmaToken,
     spaceId,
     entryId: existingEntryId
-  })
+  });
 
   // Update existing entry, get updated version number
   // Publish it
@@ -31,27 +31,27 @@ async function run() {
     spaceId,
     version,
     entryId: existingEntryId
-  })
+  });
 
   await publishEntry({
     cmaToken,
     spaceId,
     entryId: existingEntryId,
     version: updatedVersion
-  })
+  });
 
   await waitUntilContentIsDelivered({
     entryId: existingEntryId,
     expectedVersion: updatedVersion,
     spaceId,
     cdaToken
-  })
+  });
 
-  console.log(msSince(publishStartedAt))
+  console.log(msSince(publishStartedAt));
 }
 
-function msSince(start) {
-  const finish = process.hrtime(start)
+function msSince (start) {
+  const finish = process.hrtime(start);
 
-  return finish[0] * 1000 + finish[1] / 1e6
+  return finish[0] * 1000 + finish[1] / 1e6;
 }
