@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  test:
+  benchmark:
     docker:
       - image: circleci/node:10.0.0
     steps:
@@ -25,9 +25,34 @@ jobs:
           name: Perform benchmark
           command:  |
             ./run.sh
+  test:
+    docker:
+      - image: circleci/node:10.0.0
+    steps:
+      - checkout
+      - run:
+          name: Setup docker
+          command: |
+            docker --version
+      - run:
+          name: Setup circle
+          command:  |
+            circleci version
+      - run:
+          name: Install Node deps
+          command: |
+            npm install
+      - run:
+          name: Perform test
+          command:  |
+            ./test.sh
 
 workflows:
    version: 2
+   test:
+     jobs:
+          - test
+
    nightly:
      triggers:
        - schedule:
@@ -37,4 +62,4 @@ workflows:
                only:
                  - master
      jobs:
-       - test
+          - benchmark
