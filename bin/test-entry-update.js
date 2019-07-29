@@ -16,7 +16,7 @@ const {
 const cmaToken = process.env.CMA_TOKEN;
 const spaceId = process.env.SPACE_ID;
 const cdaToken = process.env.CDA_TOKEN;
-const existingEntryId = process.env.EXISTING_ENTRY_ID;
+const existingEntryId = process.env.ENTRY_ID;
 
 require.main === module && run({ cmaToken, cdaToken, spaceId });
 
