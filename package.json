@@ -4,8 +4,7 @@
   "description": "Synth test for time to publish",
   "main": "index.js",
   "scripts": {
-    "test": "node run.js",
-    "lint": "eslint './**/*.js'"
+    "test": "node run.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,14 +12,5 @@
     "dotenv": "^8.0.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7"
-  },
-  "devDependencies": {
-    "@contentful/eslint-config-backend": "^6.0.1",
-    "eslint": "^4.19.1",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-mocha": "^6.0.0",
-    "eslint-plugin-node": "^9.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.0"
   }
 }
