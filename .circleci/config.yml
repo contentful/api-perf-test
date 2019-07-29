@@ -24,7 +24,7 @@ jobs:
       - run:
           name: Perform benchmark
           command:  |
-            aws cloudwatch put-metric-data --metric-name TimeToPublished --namespace CtfPerf --value $(node run.js) --unit Milliseconds --timestamp $(date -u +"%Y-%m-%dT%H:%M:%SZ") --region us-east-1
+            ./run.sh
 
 workflows:
    version: 2
