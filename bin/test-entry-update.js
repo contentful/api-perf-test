@@ -48,7 +48,7 @@ async function run({ cmaToken, cdaToken, spaceId }) {
     spaceId,
     version: latestVersion,
     entryId: existingEntryId,
-    populateContent: populateSimplePost
+    populateContent: populateSimpleEntry
   })
 
   await publishEntry({
@@ -68,13 +68,10 @@ async function run({ cmaToken, cdaToken, spaceId }) {
   console.log(endTimer())
 }
 
-function populateSimplePost() {
+function populateSimpleEntry() {
   return {
     fields: {
       title: {
-        "en-US": Date.now().toString(36)
-      },
-      content: {
         "en-US": Date.now().toString(36)
       }
     }
