@@ -16,7 +16,7 @@ SPACE_ID= # required
 ENTRY_ID= # required only for update test
 ```
 
-And now you can run the tests individually, calling their bath;
+And now you can run the tests individually, calling their path;
 
 ```bash
 $ node bin/test-entry-creation.js
