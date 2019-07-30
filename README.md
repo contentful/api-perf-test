@@ -10,10 +10,10 @@ This repository contains several performance measurement tools for Contentful AP
 Prepare following environment variables in your system;
 
 ```
-CDA_TOKEN="QgbZ_KYe1ee4uXs2YgvuFTzEgYolZfgr8D5mbk0MuwE" # required
-CMA_TOKEN="CFPAT-9T_b8LlfgYgTS5e5DGeYHxQg6OXHQb33FTQpAfiGMpA" # required
-SPACE_ID=kmdsw3fyti8s # required
-ENTRY_ID=7IjufXBJoLaVmgluj49U2y # required only for update test
+CDA_TOKEN="" # required
+CMA_TOKEN="" # required
+SPACE_ID= # required
+ENTRY_ID= # required only for update test
 ```
 
 And now you can run the tests individually, calling their bath;
