@@ -37,8 +37,6 @@ async function run ({ cmaToken, cdaToken, spaceId }) {
     entryId: existingEntryId
   });
 
-  const endTimer = startTimer();
-
   // Update existing entry, get updated version number
   // Publish it
   // Send requests to CDA until published version is delivered
@@ -50,6 +48,8 @@ async function run ({ cmaToken, cdaToken, spaceId }) {
     entryId: existingEntryId,
     populateContent: populateSimpleEntry
   });
+
+  const endTimer = startTimer();
 
   await publishEntry({
     cmaToken,
