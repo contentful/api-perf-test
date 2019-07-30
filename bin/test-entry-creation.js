@@ -1,7 +1,12 @@
 require('dotenv').config();
 
 const startTimer = require('../lib/timer');
-const { createEntry, publishEntry } = require('../lib/content');
+const {
+  createEntry,
+  publishEntry,
+  deleteEntry,
+  unpublishEntry
+} = require('../lib/content');
 const { waitUntilContentIsDelivered } = require('../lib/delivery');
 
 const cmaToken = process.env.CMA_TOKEN;
@@ -15,8 +20,6 @@ module.exports = {
 };
 
 async function run ({ cmaToken, cdaToken, spaceId }) {
-  const endTimer = startTimer();
-
   // Create a new entry
   // Publish it
   // Send requests to CDA until published version is delivered
@@ -28,6 +31,8 @@ async function run ({ cmaToken, cdaToken, spaceId }) {
     populateContent: populateSimpleEntry
   });
 
+  const endTimer = startTimer();
+
   await publishEntry({ cmaToken, spaceId, entryId, version: entryVersion });
   await waitUntilContentIsDelivered({
     entryId,
@@ -37,6 +42,9 @@ async function run ({ cmaToken, cdaToken, spaceId }) {
   });
 
   console.log(endTimer());
+
+  await unpublishEntry({ cmaToken, spaceId, entryId, entryVersion });
+  await deleteEntry({ cmaToken, spaceId, entryId, entryVersion });
 }
 
 function populateSimpleEntry () {
